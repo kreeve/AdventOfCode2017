@@ -3,7 +3,7 @@ import Control.Monad
 import Data.Char
 
 -- Helper function for part 1
--- Check 
+-- Add head of list to sum if it matches next element
 sumFollowsHelper h (x:y:xs)
   | x == y = x + (sumFollowsHelper h ([y] ++ xs))
   | x /= y = sumFollowsHelper h ([y] ++ xs)
