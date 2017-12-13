@@ -16,7 +16,7 @@ updateScannerState (ScannerState pos len dir) =
     Up -> if pos > 0
       then ScannerState (pos-1) len Up
       else ScannerState (pos+1) len Down
-    Down -> if pos < len-1
+    Down -> if pos < len-1 
       then ScannerState (pos+1) len Down
       else ScannerState (pos-1) len Up
       
