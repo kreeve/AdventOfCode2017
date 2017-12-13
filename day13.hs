@@ -16,7 +16,7 @@ updateScannerState (ScannerState pos len dir) =
     Up -> if pos > 0
       then ScannerState (pos-1) len Up
       else ScannerState (pos+1) len Down
-    Down -> if pos <= len-1
+    Down -> if pos < len-1
       then ScannerState (pos+1) len Down
       else ScannerState (pos-1) len Up
       
@@ -40,7 +40,7 @@ step (World ppos layers c) =
       PersonPos (Layer depth state) pos ->
         if depth >= ((length layers) - 1)
         then Done
-        else PersonPos (layers' !! (depth+1)) pos
+        else PersonPos (layers !! (depth+1)) pos
   in
     World ppos' layers' (c + (cost ppos'))
               
@@ -56,7 +56,8 @@ createState dict = create' dict (World Starting [] 0)
           ((next,v),d') = Map.deleteFindMin d
           layer = Layer next (ScannerState 0 v Down)
           state' = case state of
-            World p lst c  -> World p (lst ++ [layer]) c
+            World Starting [] c  -> World Starting ([layer]) c
+            World p lst c -> World p (lst ++ [layer]) c
         in
           create' d' state'
     
