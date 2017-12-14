@@ -1,3 +1,5 @@
+import Control.Monad
+import Util
 import qualified Data.Map as Map
 
 data Dir = Up | Down deriving (Show,Eq)
@@ -12,20 +14,23 @@ data WorldState = World PersonPos [Layer] Int deriving (Show, Eq) -- Person, lay
 -- Update the state of a scanner at a timestep
 updateScannerState :: ScannerState -> ScannerState
 updateScannerState (ScannerState pos len dir) =
-  case dir of
-    Up -> if pos > 0
-      then ScannerState (pos-1) len Up
-      else ScannerState (pos+1) len Down
-    Down -> if pos < len-1 
-      then ScannerState (pos+1) len Down
-      else ScannerState (pos-1) len Up
+  if len == 1 then (ScannerState pos len dir)
+  else
+    case dir of
+      Up -> if pos > 0
+        then ScannerState (pos-1) len Up
+        else ScannerState (pos+1) len Down
+      Down -> if pos == len-1 
+        then ScannerState (pos-1) len Up
+        else ScannerState (pos+1) len Down
       
 -- Cost of this person being here
 cost :: PersonPos -> Int
 cost (PersonPos (Layer depth (ScannerState spos len dir)) ppos) =
-  if spos == ppos
-  then depth * len
-  else 0
+  if len == 1 then 0 else
+    if spos == ppos
+    then depth * len
+    else 0
 cost Starting = 0
 cost Done = 0
 
@@ -69,3 +74,39 @@ play state =
     case ps of
       Done -> c
       _ -> play (step state)
+
+makeDict :: [[String]] -> (Map.Map Int Int)
+makeDict lines =
+  let
+    dict = Map.fromList (map make' lines)
+      where
+        make' line =
+          let
+            [k,v] = map readInt line
+          in
+            (k,v)
+    allNums = take (foldr1 max (Map.keys dict)) [0,1..]
+    dict' = foldr fix' dict allNums
+      where
+        fix' n d =
+          let
+            v = Map.lookup n d
+          in
+            case v of
+              Nothing -> Map.insert n 1 d
+              Just i -> Map.insert n i d
+  in
+    dict'
+    
+        
+
+main :: IO()
+main =
+  do
+    lines <- replicateM 43 getLine
+    let
+      vals = map (\l -> split ':' l) lines
+      dict = makeDict vals
+      start = createState dict
+    print $ start
+    print $ play start
