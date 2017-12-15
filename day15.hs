@@ -16,14 +16,20 @@ compareVals v1 v2 = cmp' v1 == cmp' v2
 genSeries :: Int -> Int -> [Int]
 genSeries factor start = iterate (gen factor) start
 
--- Part 1
-part1 :: Int -> Int -> Int
-part1 astart bstart =
+-- Solve a generic problem
+solve :: (Int->Bool) -> (Int->Bool) -> Int -> Int -> Int -> Int
+solve acond bcond n astart bstart =
   let
-    n = 40000000
-    avals = genSeries 16807 astart
-    bvals = genSeries 48271 bstart
+    avals = filter acond $ genSeries 16807 astart
+    bvals = filter bcond $ genSeries 48271 bstart
     cmps = map (uncurry compareVals) $ zip avals bvals
   in
     length $ filter (\x->x) (take n cmps)
-    
+
+-- Part 1: all vals
+part1 :: Int -> Int -> Int
+part1 = solve (\x->True) (\x->True) 40000000
+
+-- Part 2: only mults of 4 and 8
+part2 :: Int -> Int -> Int
+part2 = solve (\x -> x `mod` 4 == 0) (\x -> x `mod` 8 == 0) 5000000
