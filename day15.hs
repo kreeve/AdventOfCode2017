@@ -13,21 +13,17 @@ compareVals v1 v2 = cmp' v1 == cmp' v2
     cmp' v = v `mod` (2^16)
 
 -- Generate the values
-genSeries :: Int -> Int -> Int -> [Int]
-genSeries factor start n =
-  let
-    f = scanl (.) start (replicate n (gen factor))
-  in
-    f
+genSeries :: Int -> Int -> [Int]
+genSeries factor start = iterate (gen factor) start
 
 -- Part 1
 part1 :: Int -> Int -> Int
 part1 astart bstart =
   let
     n = 40000000
-    avals = genSeries 16807 astart n
-    bvals = genSeries 48271 bstart n
+    avals = genSeries 16807 astart
+    bvals = genSeries 48271 bstart
     cmps = map (uncurry compareVals) $ zip avals bvals
   in
-    length $ filter (\x->x) cmps
+    length $ filter (\x->x) (take n cmps)
     
