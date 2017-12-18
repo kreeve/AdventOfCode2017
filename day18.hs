@@ -86,12 +86,27 @@ part1 state =
     case state' of
       (ProgramState _ _ r _ _) -> if r > 0 then r else part1 state'
 
-runMt :: ProgramState -> [Int] -> ProgramState
-runMt (ProgramState idx lastFreq recvd instrList tbl) vals =
+runMt :: ProgramState -> [Int] -> [Int] -> (ProgramState, [Int])
+runMt (ProgramState idx lastFreq recvd instrList tbl) vals sent =
   let
-    instr = instList !! idx
-    
+    instr = instrList !! idx
+    vals' = case instr of
+      (Recv _ ) -> if (length vals) > 0 then (tail vals) else vals
+      _ -> vals
+    state' = case instr of
+      (Recv r) -> if (length vals) > 0
+        then (ProgramState idx lastFreq (head vals) instrList tbl)
+        else (ProgramState idx lastFreq recvd instrList tbl)
+    state'' = update state'
+    sent' = case state'' of
+      (ProgramState _ f _ _ _) -> if f > 0 then f:sent else sent
+  in
+    case vals of
+      [] -> ((ProgramState idx lastFreq recvd instrList tbl), sent)
+      (v:vs) -> runMt state'' vals' sent'
 
+runOnce :: ProgramState -> (ProgramState, [Int])
+runOnce state = runMt state [] []
 
 main :: IO()
 main =
