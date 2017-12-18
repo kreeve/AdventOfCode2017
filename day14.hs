@@ -50,5 +50,4 @@ numOnesList lst = foldr (+) 0 (map numOnes lst)
 hashesToLst :: [String] -> [Int]
 hashesToLst = foldr1 (++) . (map (hexStrToInt . knotHash))
 
-
 onesFromStr s = foldr1 (+) $ map numOnes (map i2b (hashesToLst (allHash s)))
