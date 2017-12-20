@@ -1,5 +1,6 @@
 module Util(replace
            , argMax
+           , argMin
            , fixedPoint
            , fst3
            , findCycle
@@ -7,7 +8,8 @@ module Util(replace
            , allSame
            , majority
            , split
-           , readInt) where
+           , readInt
+           , manhattanDist) where
 import Data.Maybe
 import qualified Data.Set as Set
 -- Take an index to a sequence, replace that index w/ modified value
@@ -17,10 +19,16 @@ replace idx val seq = (take idx seq) ++ [val] ++ (drop (idx+1) seq)
 
 -- Find index with largest value.
 argMax :: Ord a => [a] -> (Int,a)
-argMax lst =
+argMax = argThing max
+
+argMin :: Ord a => [a] -> (Int,a)
+argMin = argThing min
+
+argThing :: Ord a => (a -> a -> a) -> [a] -> (Int,a)
+argThing f lst =
   let
     n = length lst
-    m = foldr1 max lst
+    m = foldr1 f lst
     zipped = zip (take (length lst) [0,1..]) lst
   in
     let
@@ -97,3 +105,8 @@ split c s = firstWord : (split c rest)
 
 readInt :: String -> Int
 readInt = read
+
+manhattanDist :: Num a => [a] -> [a] -> a
+manhattanDist (x:xs) (y:ys) = abs (x-y) + manhattanDist xs ys
+manhattanDist [] [] = 0
+manhattanDist l1 l2 = error $ "Mismatched lenghts."
